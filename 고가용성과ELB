@@ -1,0 +1,68 @@
+1. 고가용성의 실현방법
+-AWS쪽에서 고가용성의 설계를 담당하는 서비스를 사용한다:S3/Glacier, DynamoDB,SWF,SQS/SNS/SES,
+Route53, ELB/Auth-Scailing, Lambda, IAM, Data Pipeline, Kinesis, EFS, CLoud Watch등
+-유저쪽에서 고가용 설정을 따로 함: EC2, EMR, Direct Connet
+
+2. 고가용성을 서포트하는 서비스를 이용한 아키텍처
+-Route53으로 페일오버
+-ELB로 로드밸런싱
+-CloudWatch로 모니터링
+-Auto-scaling로 스케일러빌리티를 확보
+-Lambda를 이용한 스케일링 처리
+-ElasticCache를 이용한 캐쉬 액세스의 활용
+
+3. 단일성 장애를 회피하기 위해서
+-단일 AZ 단일 VPC 라는 심플한 구성을 취하면 단일 장애점(SPOF)을 해소한다.
+-예를 들면 멀티 AZ에서 마스터/슬레이브 구성을 취하여 자동 페일오버를 설정하거나 리드레플리카를 이용하여 부하를 분산시킨다.
+-인스턴스 장애에 대처하기 위한 방법으로는 Route53과 Elastic IP를 이용하여
+같은 퍼블릭IP를 가진 다른 인스턴스에 다른 IP를 라우팅하는 방법도 있다.
+
+4. ELB
+-매니지드 로드밸런싱 서비스로서 EC2인스턴스의 처리분산시 표준적으로 쓰인다
+-인스턴스의 이상움직임을 감지하여 대응한다.
+-퍼블릭/프라이빗 둘다 쓸수 있다.
+-ELB자체도 부하에 따라 캐퍼시티를 자동으로 증감하는 스케일링을 실시한다.
+-종량 과금제
+-Auto-Scaling, Route 53, Cloud Formation 등과 연계한다
+
+5. ELB 주요기능
+-헬스체크: EC2인스턴스의 정상/이상을확인하여 이용가능한 EC2에 처리 배분가능
+-부하분산: 연결된 EC2의 부하에 대해 여러개의 AZ를 넘나드는 EC2인스턴스 부하분산이 가능
+-SSL서포트: SSL Termination으로 쓸수 있음
+-Sticky Session(선별적 접근): 세션중에 같은 유저한테서 온 리퀘스트를 모두같은 EC2에 송신할 수 있음.
+-Connection Draining: 인스턴스가 연결해제, 혹은 이상이 발생했을때 백엔드 인스턴스로의 신규 리퀘스트를 정지함
+-S3에 접속 로그 저장
+
+6. ELB의 종류
+-CLB(Classinc Load Balancer)
+-ALB(Application Load Balancer)
+-NLB(Network Load Balancer)
+
+7. CLB
+-L4/L7에서의 로드밸런싱이 가능하나 복잡한 설정은 못함
+-HTTP/HTTPS와 TCP/SSL 프로토콜의 L4와 L7에 대응
+-Proxy 프로토콜에 의한 소스 IP 주소 식별
+-ELB와 백엔드의 EC2 인스턴스간에 HTTPS/SSL 사용시에 서버 증명서를 인증
+-CLB 휘하의 인스턴스는 모두 동일한 기능을 가진 인스턴스가 필요함
+
+8. ALB(Applictation Load Balancer)
+-URL 경로를 기반으로 라우팅가능.
+-WebSocket과 HTTP/2 요청에 대응
+-하나의 인스턴스에 여러포트 등록가능
+-EC2 인스턴스를 타깃 그룹에 할당하고 여러 포트를 개별 타깃으로 등록가능하기 때문에 포트를 사용한 컨테이너 로드밸런싱가능
+-타겟 그룹을 통한 헬스 체크 가능
+-접속 로그 정보 추가 기능
+-EC2와 마찬가지로 삭제 보호가능
+-ALB가 캐퍼시티를 자동으로 증감할 수 있음.
+-ALB는 경로 기반 라우팅이 가능하기 때문에 CLB보다 간단히 밸런싱을 구성할 수 있다
+
+9. NLB(Network Load Balancer)
+-초저지연으로 높은 쓰루풋을 유지하면서 초간 수백만 리퀘스트를 다루도록 설계됨.
+-OSI모델의 고정IP주소를 가진L4로드밸런서
+-휘발성 워크로드를 처리하여 초당 수백만 요청에 대응가능
+-VPC 외부에 있는 타깃을 포함한 IP주소나 정적IP주소를 이용하여 등록가능
+-여러 포트로 각 인스턴스 또는 IP주소를 동일 타겟 그룹에 등록 가능
+-대규모 액세스가 예측될때 CLB나 ALB에서 필요했던 Pre-warming 신청이 필요 없음
+-ALB나 CLB는 X-Forwarded-For 를 통해 소스 IP 주소를 판별하지만, NLB는 소스IP 주소와 소스포트를 갱신하지 않기 때문에 패킷만으로도 송신처 판단가능
+-컨테이너형 어플리케이션을 지원
+-각 서비스의 개별 헬스 체크 모니터링을 지원
