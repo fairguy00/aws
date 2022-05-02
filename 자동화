@@ -1,0 +1,29 @@
+1. 관련서비스
+- Cloud Formation, Code 시리즈(CodeCommit, CodeBuild, CodeDeploy), ECS, Auto Scaling, Elastic Beanstalk, OpsWorks, EC2 Run Command
+- 환경을 자동화함으로써 개발속도를 높이는 DevOps와 CI/CD를 통한 개발을 실현
+
+2. 서비스 상세
+- Code 시리즈(CodeCommit, CodeBuild, CodeDeploy): 개발코드의 Git 상의 커밋 실행 및 배로를 자동화. Pipeline은 CloudFormation과 ECS의 배포자동화에도 이용 가능
+
+- Elastic Beanstalk: 웹 응용 프로그램이나 서비스를 자주쓰는 서버에서 배포 및 스케일링하기 위한 서비스
+
+- OpsWorks: Chef 및 Puppet의 관리형 인스턴스 서버 설정, 배포, 관리를 자동화할 수 있게 되는 설정 관리 서비스
+
+- CloudFormation: 클라이드 환경 내의 모든 인프라스트럭처 리소스를 코드화하고 프로비저닝하기 위해 템플릿화된 프로비저닝 서비스
+
+- CloudWatch: EC2 인스턴스나 EBS 볼륨, DB 인스턴스 또는 커스텀 매트릭스 등의 자원을 쉽게 모니터링할 수 있는
+
+- Amazon ECS: AWS 상에서 Docker컨테이너에 의한 환경 구축 템플릿을 실현하는 서비스. Docker File에 환경 이미지를 설정하고 인프라 설정을 코드화함
+
+3. Elastic Beanstalk
+- 빠르고 간단하게 애플리케이션을 배포하는 서비스
+
+- Java, PHP, Ruby, Python, Node.js, .NET, Docker, Go에 대응하여 WEB어플리케이션을 전개할 수 있다.
+
+- Apache, Nginx, Passenger, IIS 등 익숙한 서버에서 배포 및 스케일링 가능
+
+- 코드를 업로드하면 캐퍼시티의 프로비저닝, 로드밸런싱, Auto Scaling 부터 애플리케이션의 헬스 모니터링까지 배포자동화 할 수 있다
+
+- 사용례:
+웹서버 구축시(ELB + Auto Scaling으로 구성을 코드화하여 유연한 웹 애플리케이션을 실행할 수 있다. 단일 컨테이너라면 Docker 컨테이너, 여러개의 컨테이너는 ECS를 사용한 환경 실행이 가능)
+워커환경구축시(SQS + Auto Scailing으로 확장 가능한 배치 처리 워크 구현. 정기적인 작업 실행 기반을 만들 수 있다. 매일 심야 1시에 동작하는 백업 처리등)
